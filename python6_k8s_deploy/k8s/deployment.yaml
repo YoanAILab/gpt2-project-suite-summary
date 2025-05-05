@@ -1,0 +1,28 @@
+# 这是一份 Kubernetes 的 Deployment 配置文件，用于部署一个本地构建的 GPT-2 推理服务容器
+apiVersion: apps/v1  # 表示使用 apps/v1 的 Deployment 资源定义
+kind: Deployment  # 表示要创建的资源类型是一个 Deployment
+metadata:
+  name: gpt2-k8s-deployment  # 部署的名字，用于标识该 Deployment 对象。即 Deployment 的名字
+spec:  # 部署配置
+  replicas: 1  # 定义需要启动的 Pod 副本数。此处设为 1，表示只启动一个实例，启动 1 个 Pod 实例。
+  selector:  # 定义了 selector（选择规则），Deployment 会去找 所有 label 为 app: gpt2-k8s 的 Pod，并管理它们
+    matchLabels:
+      app: gpt2-k8s  # Deployment 管理的是那些 打了标签 app: gpt2-k8s 的 Pod
+  template:  # Deployment 会去找 所有 label 为 app: gpt2-k8s 的 Pod，并管理它们
+    metadata:
+      labels:
+        app: gpt2-k8s
+    spec: # 容器定义
+      containers:
+        - name: gpt2-k8s-container  # Pod 中容器的名字，只是一个标识容器本身的标签，只定义了这一个容器，所以这个 pod 中只有1个容器
+          image: gpt2-k8s-backend:latest  # 本地构建的镜像
+          imagePullPolicy: Never   # ❗一定要加上！，否则 Kubernetes 会默认尝试去远程拉取镜像，而不是使用你刚刚本地构建的
+          ports:
+            - containerPort: 6006
+          resources:
+            limits:  # 容器最多只能用 1 核 CPU 和 1GB 内存
+              cpu: "1"
+              memory: "1Gi"
+            requests: # 用于 Pod 排布，起始分配 0.5 核 CPU 和 512MB 内存
+              cpu: "0.5"
+              memory: "512Mi"

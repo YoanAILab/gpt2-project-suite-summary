@@ -1,0 +1,20 @@
+# Dockerfile_v6_backend
+
+# ✅ 使用官方 PyTorch 镜像（含 CUDA 支持）
+FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+
+# ✅ 设置工作目录
+WORKDIR /app
+
+# ✅ 复制 K8s 项目代码（量化模型服务）
+COPY ./python6_k8s_deploy /app
+
+# ✅ 安装依赖
+COPY requirements_v6_backend.txt /app/
+RUN pip install -r requirements_v6_backend.txt
+
+# ✅ 默认暴露端口
+EXPOSE 6006
+
+# ✅ 启动量化模型服务（k8s入口）
+CMD ["python", "k8s_quant_api_server.py"]

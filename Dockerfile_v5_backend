@@ -1,0 +1,20 @@
+# Dockerfile_v5_backend
+
+# 使用官方PyTorch镜像（带CUDA支持）
+FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-runtime
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制量化版项目代码
+COPY ./python5_quantization /app
+
+# 安装依赖
+COPY requirements_v5_backend.txt /app/
+RUN pip install -r requirements_v5_backend.txt
+
+# 默认暴露端口
+EXPOSE 6006
+
+# 启动量化模型API服务
+CMD ["python", "app.py"]

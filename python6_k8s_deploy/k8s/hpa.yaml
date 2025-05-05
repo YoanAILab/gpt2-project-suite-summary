@@ -1,0 +1,24 @@
+# Kubernetes 的 水平自动扩缩容（Horizontal Pod Autoscaler, HPA） 配置文件，用于根据 CPU 使用率自动调整 Pod 副本数。
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler  # 创建的资源类型是 HPA（HorizontalPodAutoscaler）
+metadata:
+  name: gpt2-k8s-hpa  # 为 HPA 设置名称，方便后续通过 kubectl get hpa 管理
+spec:  # 关联对象与副本范围
+  scaleTargetRef: # 表示要自动扩缩容的目标对象
+    apiVersion: apps/v1  # 目标是 apps/v1
+    kind: Deployment  # 类型是 Deployment
+    name: gpt2-k8s-deployment  # 部署名称是 gpt2-k8s-deployment（必须和你的 deployment.yaml 一致）
+  minReplicas: 1  # 设置最小和最大副本数 当负载低时至少保留 1 个副本
+  maxReplicas: 3  # 高负载时最多自动扩展到 3 个副本
+  metrics:  # 扩缩指标，指定扩缩依据为 CPU 资源使用率
+    - type: Resource  # 表示按资源指标扩缩
+      resource:
+        name: cpu  # 表示监控 CPU 使用情况
+        target:
+          type: Utilization
+          averageUtilization: 60  # 表示平均 CPU 使用率超过 60% 时开始扩容
+# | 状态 | Pod 数量 | 每个 Pod 平均 CPU | 总请求负载 | 结果          |
+# | -- | ------ | ------------- | ----- | ----------- |
+# | 初始 | 1      | 90%           | 90%   | 触发扩容        |
+# | 扩容 | 2      | 45%           | 90%   | 每个 Pod 压力下降 |
+# | 扩容 | 3      | 30%           | 90%   | 更加轻松        |

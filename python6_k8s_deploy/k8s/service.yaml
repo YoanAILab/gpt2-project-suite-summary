@@ -1,0 +1,14 @@
+#  Kubernetes 中用于对外暴露服务的 Service 配置文件
+apiVersion: v1
+kind: Service  # 表示要创建的资源类型是 Service，用于在集群内外访问 Pod
+metadata:
+  name: gpt2-k8s-service  # 给这个 Service 起一个名字，这里叫 gpt2-k8s-service，用于 kubectl 管理与引用
+spec:  # Service 规格
+  # 适合本地开发、Minikube 等环境，生产环境通常使用 LoadBalancer
+  type: NodePort  # Service 类型设置为 NodePort,表示会分配一个主机（Node）的端口，把集群外部的请求转发到集群内部的服务上
+  selector:  # 指定该服务要转发流量给哪些 Pod
+    app: gpt2-k8s  # 会选中所有标签为 app: gpt2-k8s 的 Pod（与 deployment.yaml 中 Pod 的 label 匹配）
+  ports:
+    - port: 6006         # 服务端口,暴露在集群内的端口（ClusterIP层面），你可以在其他 Pod 中通过 gpt2-k8s-service:6006 访问。
+      targetPort: 6006   # 容器端口, 指定流量最终转发到容器的哪个端口，这里是 Flask 服务监听的 6006 端口。
+      nodePort: 30066    # 本地访问端口（可改）,在宿主机（Node）上暴露的端口。你可以通过 http://<Node IP>:30066 访问服务

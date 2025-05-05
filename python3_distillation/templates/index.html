@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student 模型推理 Demo</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Student 小模型推理 Demo</h1>
+
+        <textarea id="promptInput" placeholder="请输入你的 prompt..." rows="4"></textarea>
+        <button onclick="submitPrompt()">提交推理</button>
+
+        <div id="resultArea"></div>
+    </div>
+
+    <script>
+        async function submitPrompt() {
+            const prompt = document.getElementById("promptInput").value;
+            const response = await fetch('/infer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: prompt })
+            });
+            const data = await response.json();
+            document.getElementById("resultArea").innerHTML = "<h2>推理结果：</h2><p>" + data.response + "</p>";
+        }
+    </script>
+</body>
+</html>
